@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Shared/Navbar';
 import Sidebar from '../../../components/Shared/Sidebar';
 import Footer from '../../../components/Shared/Footer';
@@ -15,11 +15,11 @@ const sales = [
 ];
 
 export default function AddInventory() {
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const router = useRouter();
+    const [openDropdown, setOpenDropdown] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const router = useRouter();
   
-  useEffect(() => {
+    useEffect(() => {
         const user = localStorage.getItem('userDetails');
         const userDetails = JSON.parse(user);
         if(user && userDetails) {
