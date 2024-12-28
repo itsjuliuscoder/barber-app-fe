@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+.imageColumn {
+  flex: 1;
+  position: relative;
+}
+
+.formColumn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+}
+
+.loginForm h2 {
+  margin-bottom: 20px;
+}
+
+.loginForm label {
+  margin-bottom: 5px;
+}
+
+.loginForm input {
+  margin-bottom: 15px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.loginForm button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.loginForm button:hover {
+  background-color: #005bb5;
+}
