@@ -10,6 +10,7 @@ export default function Dashboard() {
 
   const [userData, setUserData] = useState(null);
   const router = useRouter();
+  
   useEffect(() => {
     const user = localStorage.getItem('userDetails');
     const userDetails = JSON.parse(user);
@@ -19,6 +20,8 @@ export default function Dashboard() {
         router.push('/')
     }
   }, [router]);
+
+  
 
   return (
     <div className="flex flex-col h-screen">

@@ -3,13 +3,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FaBell } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 const Navbar = ({ data }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userDetails');
+    router.push('/');
+  };
+
 
   return (
     <nav className="bg-gray-800 text-white p-4">
@@ -57,9 +65,12 @@ const Navbar = ({ data }) => {
                 <Link href="/settings" legacyBehavior>
                   <a className="block px-4 py-2 hover:bg-gray-200">Settings</a>
                 </Link>
-                <Link href="/logout" legacyBehavior>
-                  <a className="block px-4 py-2 hover:bg-gray-200">Logout</a>
-                </Link>
+                <a
+                  onClick={() => handleLogout()}
+                  className="block px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                >
+                  Logout
+                </a>
               </div>
             )}
           </div>
