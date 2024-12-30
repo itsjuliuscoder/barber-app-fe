@@ -5,6 +5,11 @@ const API = axios.create({
     headers: { 'Content-Type': 'application/json' },
 });
 
+const getToken = () => {
+    const token = localStorage.getItem('accessToken');
+    return token;
+}
+
 const APIHeaders = (token) => ({
     headers: {
         'Content-Type': 'application/json',
@@ -22,16 +27,25 @@ export const login = async (email, password) => {
     }
 };
 
-export const logout = async (token) => {
+export const getAllSales = async () => {
+
     try {
-        const response = await API.post('/auth/logout', { token });
+        const response = await API.get('/sales', APIHeaders(getToken()));
         return response.data;
     } catch (error) {
         throw error.response?.data || 'An error occurred';
     }
-};
 
-export const getAllSales = async (token) => {
+}
+
+export const getAllInventories = async () => {
+
+    try {
+        const response = await API.get('/inventory', APIHeaders(getToken()));
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || 'An error occurred';
+    }
 
 }
 
@@ -40,13 +54,29 @@ export const getSalesById = async (id, token) => {
 }
 
 export const getAllUsers = async (token) => {
+    try {
+        const response = await API.get('/users', APIHeaders(getToken()));
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || 'An error occurred';
+    }
+}
+
+export const addNewUser = async (user) => {
+    
+    try {
+        const response = await API.post('/users/add-user', user);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || 'An error occurred';
+    }
 
 }
 
-export const addUser = async (user, token) => {
+export const addSales = async (salesData) => {
     
     try {
-        const response = await API.post('/user/add-user', user);
+        const response = await API.post('/sales', salesData);
         return response.data;
     } catch (error) {
         throw error.response?.data || 'An error occurred';
@@ -58,10 +88,10 @@ export const updateUser = async (user, token) => {
 
 }
 
-export const addNewInventory = async (itemDetails, token) => {
+export const addNewInventory = async (itemDetails) => {
     try {
 
-        const response = await APIHeaders.post('/user/add-inventory', body);
+        const response = await API.post('/inventory/add_inventory', itemDetails);
         return response.data;
     } catch(error){
         throw error.response?.data || 'An error occured!';
