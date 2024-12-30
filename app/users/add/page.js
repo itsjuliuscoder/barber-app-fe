@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Shared/Navbar';
 import Sidebar from '../../../components/Shared/Sidebar';
 import Footer from '../../../components/Shared/Footer';
-import { FaUserTie, FaDollarSign, FaBox } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 import { addNewUser } from '@/services/api';
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,6 +14,7 @@ export default function AddUser() {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [userData, setUserData] = useState(null);
     const [pageLoader, setPageLoader] = useState(true);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     
     useEffect(() => {
@@ -28,11 +29,11 @@ export default function AddUser() {
         // Set a timeout to hide the loader after 10 seconds
         const timer = setTimeout(() => {
             setPageLoader(false);
-        }, 5000);
+        }, 3000);
     
         // Cleanup the timer
         return () => clearTimeout(timer);
-        
+
     }, [router]);
 
     const toggleDropdown = (id) => {
@@ -46,6 +47,7 @@ export default function AddUser() {
     const [commission, setCommission] = useState('');
 
     const handleSubmit = (event) => {
+        setLoading(true);
         event.preventDefault();
         const formData = {
             fullName: event.target.elements[0].value,
@@ -136,7 +138,7 @@ return (
                         </div>
                         <div className="col-span-2">
                             <button type="submit" className="w-1/4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700">
-                                Add User
+                            <span>Add New User</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
                             </button>
                         </div>
                     </form>

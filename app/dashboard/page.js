@@ -71,7 +71,7 @@ export default function Dashboard() {
     // Set a timeout to hide the loader after 10 seconds
     const timer = setTimeout(() => {
       setPageLoader(false);
-    }, 7000);
+    }, 5000);
 
     // Cleanup the timer
     return () => clearTimeout(timer);

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Shared/Navbar';
 import Sidebar from '../../../components/Shared/Sidebar';
 import Footer from '../../../components/Shared/Footer';
-import { FaUserTie, FaDolla } from 'react-icons/fa';
+import { FaUserTie, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { addNewInventory } from '@/services/api'; // Assuming you have an API function to Add Inventory
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,6 +12,8 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function AddInventory() {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [userData, setUserData] = useState(null);
+    const [pageLoader, setPageLoader] = useState(true);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     
     useEffect(() => {
@@ -22,6 +24,15 @@ export default function AddInventory() {
         } else {
             router.push('/')
         }
+
+        // Set a timeout to hide the loader after 10 seconds
+        const timer = setTimeout(() => {
+            setPageLoader(false);
+        }, 2000);
+
+        // Cleanup the timer
+        return () => clearTimeout(timer);
+
     }, [router]);
 
   const toggleDropdown = (id) => {
@@ -44,6 +55,7 @@ const handleChange = (e) => {
 };
 
 const handleSubmit = (event) => {
+    setLoading(true);
     event.preventDefault();
     console.log('Form Data:', formData);
     // Add form submission logic here
@@ -71,6 +83,18 @@ const handleSubmit = (event) => {
 
     addInventory();
 };
+
+if (pageLoader) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4 mx-auto"></div>
+        <h2 className="text-xl font-semibold">Loading...</h2>
+        <p className="text-gray-500">Please wait while the page loads.</p>
+      </div>
+      </div>
+    );
+}
 
 return (
     <div className="flex flex-col h-screen">
@@ -131,7 +155,7 @@ return (
                         </div>
                         <div className="col-span-1">
                             <button type="submit" className="w-full py-2 px-4 mt-6 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700">
-                                Add Inventory
+                                 <span>Add New Item</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
                             </button>
                         </div>
                     </form>

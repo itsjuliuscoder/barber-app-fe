@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Shared/Navbar';
 import Sidebar from '../../../components/Shared/Sidebar';
 import Footer from '../../../components/Shared/Footer';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { addSales } from '@/services/api'; // Assuming you have an API function to add sales
 import { ToastContainer, toast } from 'react-toastify';
@@ -13,6 +13,8 @@ export default function AddSales() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [payments, setPayments] = useState([{ customerName: '', amount: '', service: '' }]);
   const [userData, setUserData] = useState(null);
+  const [pageLoader, setPageLoader] = useState(true);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +25,13 @@ export default function AddSales() {
     } else {
         router.push('/')
     }
+    // Set a timeout to hide the loader after 10 seconds
+    const timer = setTimeout(() => {
+        setPageLoader(false);
+    }, 2000);
+
+    // Cleanup the timer
+    return () => clearTimeout(timer);
   }, [router]);
 
   const toggleDropdown = (id) => {
@@ -46,6 +55,7 @@ export default function AddSales() {
   };
 
   const handleSubmit = async (event) => {
+    setLoading(true);
     event.preventDefault();
     const payload = {
       payments,
@@ -60,12 +70,24 @@ export default function AddSales() {
         toast.success('Sales added successfully');
         setTimeout(() => {
             router.push('/dashboard');
-        }, 5000);
+        }, 2000);
     } catch (error) {
       console.log('Error adding sales:', error);
       toast.error('Failed to add sales');
     }
   };
+
+  if (pageLoader) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4 mx-auto"></div>
+        <h2 className="text-xl font-semibold">Loading...</h2>
+        <p className="text-gray-500">Please wait while the page loads.</p>
+      </div>
+      </div>
+    );
+  }
 
 return (
     <div className="flex flex-col h-screen">
@@ -147,7 +169,7 @@ return (
                             type="submit"
                             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
                             >
-                            Add Sales
+                            <span>Add New User</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
                             </button>
                         </div>
                     </form>

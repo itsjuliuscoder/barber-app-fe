@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './page.module.css';
@@ -15,6 +15,16 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const userDetailsString = localStorage.getItem('userDetails');
+    if (userDetailsString) {
+      const userDetails = JSON.parse(userDetailsString);
+      if (userDetails) {
+        router.push('/dashboard');
+      }
+    }
+  }, [router]);
 
   const handleLogin = async (e) => {
     setLoading(true);
