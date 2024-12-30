@@ -5,10 +5,21 @@ import Sidebar from '../../components/Shared/Sidebar';
 import Footer from '../../components/Shared/Footer';
 import { FaUserTie, FaDollarSign, FaBox } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
+import { getAllSales, getAllInventories, getAllUsers } from '@/services/api';
+import { accounting } from 'accounting';
 
 export default function Dashboard() {
 
+  const [salesData, setSalesData] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [inventories, setInventories] = useState([]);
+  const [totalInventory, setTotalInventory] = useState(0);
+  const [pageLoader, setPageLoader] = useState(true);
+ 
   const [userData, setUserData] = useState(null);
+  
   const router = useRouter();
   
   useEffect(() => {
@@ -19,33 +30,97 @@ export default function Dashboard() {
     } else {
         router.push('/')
     }
-  }, [router]);
+    const fetchSalesData = async () => {
+      try {
+        const response = await getAllSales();
+        // console.log("Sales data ---> ", response);
+        setSalesData(response.sales);
+        setTotalAmount(response.totalAmount);
+      } catch (error) {
+        console.log("Error fetching sales data:", error);
+      }
+    };
+
+    const fetchInventoriesData = async () => {
+      try {
+        const response = await getAllInventories();
+        // console.log("Inventories data ---> ", response);
+        setInventories(response.inventory);
+        setTotalInventory(response.count);
+      } catch (error) {
+        console.log("Error fetching sales data:", error);
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await getAllUsers();
+        console.log("Users:", response);
+        setUsers(response.users);
+        setTotalUsers(response.count);
+      } catch (error) {
+        console.log("Error fetching users:", error);
+      }
+    }
+
+
+    fetchUsers();
+    fetchInventoriesData();
+    fetchSalesData();
+
+    // Set a timeout to hide the loader after 10 seconds
+    const timer = setTimeout(() => {
+      setPageLoader(false);
+    }, 7000);
+
+    // Cleanup the timer
+    return () => clearTimeout(timer);
+
+  }, [router], []);
 
   
+
+  if (!userData || userData.category !== 'Admin') {
+    return null; // or you can redirect to another page
+  }
+
+  if (pageLoader) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4 mx-auto"></div>
+        <h2 className="text-xl font-semibold">Loading...</h2>
+        <p className="text-gray-500">Please wait while the page loads.</p>
+      </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen">
       <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" }  />
       <div className="flex flex-1">
-        <Sidebar />
-        <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
-          <div className="grid grid-cols-3 gap-6 mb-6 text-black">
-            <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left text-black">
-              <FaUserTie className="text-4xl mb-2" />
-              <h3 className="text-4xl font-semibold mb-2 text-black">50</h3>
-              <p className="text-[16px]">Total Barbers Enrolled</p>
+        <Sidebar data={userData} />
+          <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
+            {userData && userData.category === 'Admin' && (
+              <div className="grid grid-cols-3 gap-6 mb-6 text-black">
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left text-black">
+                <FaUserTie className="text-4xl mb-2" />
+                <h3 className="text-4xl font-semibold mb-2 text-black">{totalUsers}</h3>
+                <p className="text-[16px]">Total Users Enrolled</p>
+              </div>
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
+                <span className="text-4xl mb-2">₦</span>
+                <h3 className="text-4xl font-semibold mb-2">₦{totalAmount ? totalAmount : '....'}</h3>
+                <p className="text-[16px]">Total Amount Made</p>
+              </div>
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
+                  <FaBox className="text-4xl mb-2" />
+                  <h3 className="text-4xl font-semibold mb-2">{totalInventory ? totalInventory : "..."}</h3>
+                  <p className="text-[16px]">Total Inventory Items</p>
+              </div>
             </div>
-            <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
-              <FaDollarSign className="text-4xl mb-2" />
-              <h3 className="text-4xl font-semibold mb-2">$120,000</h3>
-              <p className="text-[16px]">Total Amount Made</p>
-            </div>
-            <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
-              <FaBox className="text-4xl mb-2" />
-              <h3 className="text-4xl font-semibold mb-2">200</h3>
-              <p className="text-[16px]">Total Inventory Items</p>
-            </div>
-          </div>
+             )}
           <div className="flex gap-6 w-full">
             <div className="flex-grow bg-gray-100 p-6 shadow-md rounded-lg basis-3/5">
               {/* Content for the first column */}
@@ -55,38 +130,29 @@ export default function Dashboard() {
                   <tr>
                     <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
                     <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Amount</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Barber</th>
+                    <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
+                    <th className="py-2 px-4 border-b border-gray-200 text-left">Staff Details</th>
+                    <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
                     <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { id: 1, customer: 'John Doe', amount: '$200', date: '2023-01-01', barber: 'Barber A' },
-                    { id: 2, customer: 'Jane Smith', amount: '$150', date: '2023-01-02', barber: 'Barber B' },
-                    { id: 3, customer: 'Sam Johnson', amount: '$300', date: '2023-01-03', barber: 'Barber C' },
-                    { id: 4, customer: 'Chris Lee', amount: '$250', date: '2023-01-04', barber: 'Barber D' },
-                    { id: 5, customer: 'Patricia Brown', amount: '$100', date: '2023-01-05', barber: 'Barber E' },
-                    { id: 6, customer: 'Michael Davis', amount: '$400', date: '2023-01-06', barber: 'Barber F' },
-                    { id: 7, customer: 'Linda Wilson', amount: '$350', date: '2023-01-07', barber: 'Barber G' },
-                    { id: 8, customer: 'Robert Martinez', amount: '$500', date: '2023-01-08', barber: 'Barber H' },
-                    { id: 9, customer: 'Mary Anderson', amount: '$450', date: '2023-01-09', barber: 'Barber I' },
-                    { id: 10, customer: 'James Taylor', amount: '$600', date: '2023-01-10', barber: 'Barber J' },
-                  ].map((sale) => (
-                    <tr key={sale.id}>
-                      <td className="py-2 px-4 border-b border-gray-200">{sale.id}</td>
-                      <td className="py-2 px-4 border-b border-gray-200">{sale.customer}</td>
-                      <td className="py-2 px-4 border-b border-gray-200">{sale.amount}</td>
-                      <td className="py-2 px-4 border-b border-gray-200">{sale.barber}</td>
-                      <td className="py-2 px-4 border-b border-gray-200">{sale.date}</td>
+                  {salesData.map((sale, index) => (
+                    <tr key={sale._id}>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.payments.map(payment => payment.customerName).join(', ')}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.payments.reduce((total, payment) => total + payment.amount, 0)}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.fullName}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.commission}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
                     </tr>
-                  ))}
+                  ))}                   
                 </tbody>
               </table>
-            </div>
-            <div className="flex-grow-0 flex-shrink-0 basis-2/5">
-              <div className="bg-gray-100 p-6 shadow-md rounded-lg">
-                {/* Content for the second column */}
+              </div>
+              <div className="flex-grow-0 flex-shrink-0 basis-2/5">
+                <div className="bg-gray-100 p-6 shadow-md rounded-lg">
+                  {/* Content for the second column */}
                 <h2 className="text-xl font-semibold mb-4">Sales Statistics</h2>
                 <p>This is the content for the second column, which takes up 40% of the width.</p>
               </div>

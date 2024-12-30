@@ -1,22 +1,44 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Sidebar from '../../components/Shared/Sidebar';
 import Footer from '../../components/Shared/Footer';
 import { FaUserTie, FaDollarSign, FaBox } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
+import { getAllInventories } from '@/services/api';
 
-const inventories = [
-    { id: 1, item: 'Clipper', serialNo: 'BB2382368', category: 'For Sale', status: 'Sold', date: '2023-10-01' },
-    { id: 2, item: 'Hair Cream', serialNo: 'BB279368', category: 'For Use', status: 'In Use', date: '2023-10-02' },
-    { id: 3, item: 'Relaxer', serialNo: 'BB899271', category: 'For Use', status: 'In Use', date: '2023-10-03' },
-    { id: 4, item: 'Hair Brush', serialNo: 'BB183T13', category: 'For Use', status: 'In Use', date: '2023-10-04' },
-    // Add more inventories as needed
-];
+
 
 export default function InventoryList() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [inventories, setInventories] = useState([]);
+
+  const router = useRouter();
+  
+  useEffect(() => {
+    const user = localStorage.getItem('userDetails');
+    const userDetails = JSON.parse(user);
+    if(user && userDetails) {
+        setUserData(userDetails);
+    } else {
+        router.push('/')
+    }
+
+    const fetchInventoriesData = async () => {
+      try {
+        const response = await getAllInventories();
+        //console.log("Inventories data ---> ", response);
+        setInventories(response.inventory);
+      } catch (error) {
+        console.log("Error fetching sales data:", error);
+      }
+    };
+
+    fetchInventoriesData();
+
+  }, [router]);
   
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -24,9 +46,9 @@ export default function InventoryList() {
 
 return (
     <div className="flex flex-col h-screen">
-        <Navbar />
+        <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" } />
         <div className="flex flex-1">
-            <Sidebar />
+        <Sidebar data={userData} />
             <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
                 <div className="bg-gray-100 p-6 shadow-md rounded-lg">
                     <div className="flex justify-between items-center mb-4">
@@ -99,18 +121,18 @@ return (
                             </tr>
                         </thead>
                         <tbody>
-                            {inventories.map((inventory) => (
-                                <tr key={inventory.id}>
-                                    <td className="py-2 px-4 border-b border-gray-200">{inventory.id}</td>
-                                    <td className="py-2 px-4 border-b border-gray-200">{inventory.item}</td>
+                            {inventories.map((inventory, index) => (
+                                <tr key={inventory._id}>
+                                    <td className="py-2 px-4 border-b border-gray-200">{index + 1}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200">{inventory.itemName}</td>
                                     <td className="py-2 px-4 border-b border-gray-200">{inventory.serialNo}</td>
                                     <td className="py-2 px-4 border-b border-gray-200">{inventory.category}</td>
-                                    <td className="py-2 px-4 border-b border-gray-200">{inventory.date}</td>
+                                    <td className="py-2 px-4 border-b border-gray-200">{new Date(inventory.addItemDate).toLocaleDateString()}</td>
                                     <td className="py-2 px-4 border-b border-gray-200">
                                         <div className="relative inline-block text-left">
                                             <button
                                                 className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
-                                                onClick={() => toggleDropdown(inventory.id)}
+                                                onClick={() => toggleDropdown(inventory._id)}
                                             >
                                                 Actions
                                                 <svg
@@ -127,7 +149,7 @@ return (
                                                     />
                                                 </svg>
                                             </button>
-                                            {openDropdown === inventory.id && (
+                                            {openDropdown === inventory._id && (
                                                 <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                                                     <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                                                         { inventory.category && inventory.category == "For Sale" ? (<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Finally Sold</a>)

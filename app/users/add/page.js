@@ -6,6 +6,8 @@ import Footer from '../../../components/Shared/Footer';
 import { FaUserTie, FaDollarSign, FaBox } from 'react-icons/fa';
 import { addNewUser } from '@/services/api';
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export default function AddUser() {
@@ -36,21 +38,39 @@ export default function AddUser() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = {
-            fullName,
-            email,
-            category,
-            specialty,
-            commission
+            fullName: event.target.elements[0].value,
+            email: event.target.elements[1].value,
+            category: event.target.elements[2].value,
+            specialty: event.target.elements[3].value,
+            commission: event.target.elements[4].value,
+            isActive: true,
+            password: 'password123' // Default password for new users
         };
         console.log(formData);
         // Add form submission logic here
+        const addUser = async () => {
+            try {
+                const response = await addNewUser(formData);
+                console.log("User added successfully:", response);
+                toast.success('User added successfully');
+                setTimeout(() => {
+                    router.push('/users');
+                }, 10000);
+            } catch (error) {
+                console.log("Error adding user:", error);
+                toast.error('An error occurred while adding the user');
+            }
+        }
+
+        addUser();
     };
 
 return (
     <div className="flex flex-col h-screen">
-        <Navbar />
+        <ToastContainer />
+        <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" } />
         <div className="flex flex-1">
-            <Sidebar />
+            <Sidebar data={userData} />
             <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
                 <div className="bg-gray-100 p-6 shadow-md rounded-lg h-full">
                     <div className="flex justify-between items-center mb-4">
@@ -83,6 +103,7 @@ return (
                                 <option value="Shave">Shave</option>
                                 <option value="Coloring">Coloring</option>
                                 <option value="Styling">Styling</option>
+                                <option value="None">None</option>
                                 {/* Add more services as needed */}
                             </select>
                         </div>

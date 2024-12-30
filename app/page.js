@@ -3,20 +3,24 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './page.module.css';
-import AuthService from '@/utils/auth';
 import { login } from '@/services/api';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaSpinner } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
+    setLoading(true);
+    setErrorMessage('');
     e.preventDefault();
-    
+
     try {
       const data = await login(email, password);
 
@@ -24,17 +28,25 @@ const LoginPage = () => {
       localStorage.setItem('userDetails', JSON.stringify(data));
       localStorage.setItem('authToken', data.token);
       setMessage(data.statusMessage);
-
-      if (data.statusCode === 200) {
-        router.push("/dashboard");
-      }
+      setLoading(false);
+      toast.success(data.statusMessage);
+      setTimeout(() => {
+        if (data.statusCode === 200) {
+          router.push("/dashboard");
+        }
+      }, 2000);
     } catch (err) {
-      setErrorMessage("Login failed --> " + err.message);
+      setLoading(false);
+      const errorMsg = "Login failed --> " + err.message;
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
+      
     }
   };
 
   return (
     <div className={styles.container}>
+      <ToastContainer />
       <div className={styles.imageColumn}>
         <Image src="/bg-2.jpg" alt="Background" layout="fill" objectFit="cover" priority />
       </div>
@@ -61,7 +73,9 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Login</button>
+          <button type="submit">
+            <span>Login</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
+          </button>
           {message && <p>{message}</p>}
           {errorMessage && <p className="error font-bold text-red-800">{errorMessage}</p>}
         </form>
