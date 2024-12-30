@@ -14,6 +14,7 @@ export default function InventoryList() {
   const [openModal, setOpenModal] = useState(false);
   const [userData, setUserData] = useState(null);
   const [inventories, setInventories] = useState([]);
+  const [pageLoader, setPageLoader] = useState(true);
 
   const router = useRouter();
   
@@ -38,11 +39,31 @@ export default function InventoryList() {
 
     fetchInventoriesData();
 
+    // Set a timeout to hide the loader after 10 seconds
+    const timer = setTimeout(() => {
+      setPageLoader(false);
+    }, 5000);
+
+    // Cleanup the timer
+    return () => clearTimeout(timer);
+
   }, [router]);
   
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
+
+  if (pageLoader) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4 mx-auto"></div>
+        <h2 className="text-xl font-semibold">Loading...</h2>
+        <p className="text-gray-500">Please wait while the page loads.</p>
+      </div>
+      </div>
+    );
+  }
 
 return (
     <div className="flex flex-col h-screen">

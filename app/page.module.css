@@ -50,3 +50,15 @@
 .loginForm button:hover {
   background-color: #005bb5;
 }
+
+/* Add this to your CSS file */
+.loader {
+  border-top-color: #3498db;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

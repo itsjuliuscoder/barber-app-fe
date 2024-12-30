@@ -111,7 +111,7 @@ export default function Dashboard() {
               </div>
               <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
                 <span className="text-4xl mb-2">₦</span>
-                <h3 className="text-4xl font-semibold mb-2">₦{totalAmount ? totalAmount : '....'}</h3>
+                <h3 className="text-4xl font-semibold mb-2">{totalAmount ? accounting.format(totalAmount) : '....'}</h3>
                 <p className="text-[16px]">Total Amount Made</p>
               </div>
               <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
@@ -140,10 +140,10 @@ export default function Dashboard() {
                   {salesData.map((sale, index) => (
                     <tr key={sale._id}>
                       <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.payments.map(payment => payment.customerName).join(', ')}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.payments.reduce((total, payment) => total + payment.amount, 0)}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">{(sale.payments.map(payment => payment.customerName).join(', '))}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.payments.reduce((total, payment) => total + payment.amount, 0))}</td>
                       <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.fullName}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.commission}</td>
+                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.commission)}</td>
                       <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
                     </tr>
                   ))}                   
