@@ -35,10 +35,6 @@ export default function AddInventory() {
 
     }, [router]);
 
-  const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
-  };
-
 const [formData, setFormData] = useState({
     itemName: '',
     category: '',
@@ -76,6 +72,7 @@ const handleSubmit = (event) => {
                 }, 3000);
             //} 
         } catch (error) {
+            setLoading(false);
             toast.error('An error occurred. Please try again.');
             console.log('Error adding inventory:', error);
         }   
@@ -154,8 +151,12 @@ return (
                             />
                         </div>
                         <div className="col-span-1">
-                            <button type="submit" className="w-full py-2 px-4 mt-6 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700">
-                                 <span>Add New Item</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
+                            <button 
+                                type="submit" 
+                                className={`w-full py-2 px-4 mt-6 font-semibold rounded-md shadow-md ${!formData.itemName || !formData.category || !formData.status ? 'bg-gray-300 text-gray-400' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                disabled={!formData.itemName || !formData.category || !formData.status}
+                            >
+                                <span>Add New Item</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
                             </button>
                         </div>
                     </form>
