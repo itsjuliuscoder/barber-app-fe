@@ -98,3 +98,17 @@ export const addNewInventory = async (itemDetails) => {
 
     }
 }
+
+export const updateInventory = async (itemDetails) => {
+    try {
+
+        itemDetails = {
+            ...itemDetails
+        }
+
+        const response = await API.put(`/inventory/${itemDetails.id}`, itemDetails);
+        return response.data;
+    } catch(error){
+        throw error.response?.data || 'An error occured!';
+    }
+}

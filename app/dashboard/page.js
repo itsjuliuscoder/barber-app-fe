@@ -80,10 +80,6 @@ export default function Dashboard() {
 
   
 
-  if (!userData || userData.category !== 'Admin') {
-    return null; // or you can redirect to another page
-  }
-
   if (pageLoader) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -101,9 +97,9 @@ export default function Dashboard() {
       <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" }  />
       <div className="flex flex-1">
         <Sidebar data={userData} />
-          <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
-            {userData && userData.category === 'Admin' && (
-              <div className="grid grid-cols-3 gap-6 mb-6 text-black">
+        <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
+          {userData && userData.category === 'Admin' ? (
+            <div className="grid grid-cols-3 gap-6 mb-6 text-black">
               <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left text-black">
                 <FaUserTie className="text-4xl mb-2" />
                 <h3 className="text-4xl font-semibold mb-2 text-black">{totalUsers}</h3>
@@ -115,44 +111,94 @@ export default function Dashboard() {
                 <p className="text-[16px]">Total Amount Made</p>
               </div>
               <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
-                  <FaBox className="text-4xl mb-2" />
-                  <h3 className="text-4xl font-semibold mb-2">{totalInventory ? totalInventory : "..."}</h3>
-                  <p className="text-[16px]">Total Inventory Items</p>
+                <FaBox className="text-4xl mb-2" />
+                <h3 className="text-4xl font-semibold mb-2">{totalInventory ? totalInventory : "..."}</h3>
+                <p className="text-[16px]">Total Inventory Items</p>
               </div>
             </div>
-             )}
+          ) : (
+            <div className="grid grid-cols-2 gap-6 mb-6 text-black">
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
+                <span className="text-4xl mb-2">₦</span>
+                <h3 className="text-4xl font-semibold mb-2">{salesData.length > 0 ? accounting.format(salesData.filter(sale => sale.user._id === userData._id).reduce((total, sale) => total + sale.payments.reduce((sum, payment) => sum + payment.amount, 0), 0)) : '....'}</h3>
+                <p className="text-[16px]">Total Amount Made</p>
+              </div>
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg text-left">
+                <FaBox className="text-4xl mb-2" />
+                <h3 className="text-4xl font-semibold mb-2">{salesData.length}</h3>
+                <p className="text-[16px]">Total Sales</p>
+              </div>
+            </div>
+          )}
           <div className="flex gap-6 w-full">
             <div className="flex-grow bg-gray-100 p-6 shadow-md rounded-lg basis-3/5">
-              {/* Content for the first column */}
-              <h2 className="text-2xl font-semibold mb-4">List of Sales</h2>
-              <table className="min-w-full bg-white">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Staff Details</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
-                    <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {salesData.map((sale, index) => (
-                    <tr key={sale._id}>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">{(sale.payments.map(payment => payment.customerName).join(', '))}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.payments.reduce((total, payment) => total + payment.amount, 0))}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.fullName}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.commission)}</td>
-                      <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
+              {userData && userData.category === 'Admin' ? (
+                <table className="min-w-full bg-white">
+                  <thead>
+                    <tr>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Staff Details</th>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
+                      <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
                     </tr>
-                  ))}                   
-                </tbody>
-              </table>
-              </div>
-              <div className="flex-grow-0 flex-shrink-0 basis-2/5">
-                <div className="bg-gray-100 p-6 shadow-md rounded-lg">
-                  {/* Content for the second column */}
+                  </thead>
+                  <tbody>
+                    {salesData.map((sale, index) => (
+                      <tr key={sale._id}>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">{(sale.payments.map(payment => payment.customerName).join(', '))}</td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.payments.reduce((total, payment) => total + payment.amount, 0))}</td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.fullName}</td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.commission)}</td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
+                      </tr>
+                    ))}                   
+                  </tbody>
+                </table>
+              ) : (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">Your Sales</h2>
+                  {salesData.length > 0 ? (
+                    <table className="min-w-full bg-white">
+                      <thead>
+                        <tr>
+                          <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
+                          <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
+                          <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
+                          <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
+                          <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {salesData.filter(sale => sale.user._id === userData._id).map((sale, index) => (
+                          <tr key={sale._id}>
+                            <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
+                            <td className="py-2 px-4 border-b border-gray-200 text-left">{(sale.payments.map(payment => payment.customerName).join(', '))}</td>
+                            <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.payments.reduce((total, payment) => total + payment.amount, 0))}</td>
+                            <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.commission)}</td>
+                            <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-gray-500 mb-4">You have not created any sales yet.</p>
+                      <button 
+                        onClick={() => router.push('/add-sale')} 
+                        className="bg-blue-500 text-white px-4 py-2 rounded">
+                        Add New Sale
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex-grow-0 flex-shrink-0 basis-2/5">
+              <div className="bg-gray-100 p-6 shadow-md rounded-lg">
+                {/* Content for the second column */}
                 <h2 className="text-xl font-semibold mb-4">Sales Statistics</h2>
                 <p>This is the content for the second column, which takes up 40% of the width.</p>
               </div>
