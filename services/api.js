@@ -112,3 +112,21 @@ export const updateInventory = async (itemDetails) => {
         throw error.response?.data || 'An error occured!';
     }
 }
+
+export const addService = async (serviceDetails) => {
+    try {
+        const response = await API.post('/services', serviceDetails);
+        return response.data;
+    } catch(error){
+        throw error.response?.data || 'An error occured!';
+    }
+}
+
+export const getAllServices = async () => {
+    try {
+        const response = await API.get('/services');
+        return response.data;
+    } catch(error){
+        throw error.response?.data || 'An error occured!';
+    }
+}

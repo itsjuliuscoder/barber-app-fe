@@ -69,6 +69,7 @@ export default function AddUser() {
                     router.push('/users');
                 }, 10000);
             } catch (error) {
+                setLoading(false);
                 console.log("Error adding user:", error);
                 toast.error('An error occurred while adding the user');
             }

@@ -20,13 +20,14 @@ export default function Sidebar({ data }) {
           </a>
         </Link>
         <div>
+        {data && data.category === 'Admin' && (
           <button
             onClick={() => toggleSection('inventory')}
             className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded w-full text-left"
           >
             <FaBox />
             <span>Inventory</span>
-          </button>
+          </button>)}
           {openSection === 'inventory' && (
             <div className="ml-6 mt-2 space-y-2">
               <Link href="/inventory/add" legacyBehavior>
@@ -35,20 +36,18 @@ export default function Sidebar({ data }) {
               <Link href="/inventory" legacyBehavior>
                 <a className="block hover:bg-gray-700 p-2 rounded">List Inventory</a>
               </Link>
-              {/* <Link href="/inventory/view" legacyBehavior>
-                <a className="block hover:bg-gray-700 p-2 rounded">View Inventory Details</a>
-              </Link> */}
             </div>
           )}
         </div>
         <div>
+        {data && data.category === 'Cashier' && (
           <button
             onClick={() => toggleSection('sales')}
             className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded w-full text-left"
           >
             <FaDollarSign />
             <span>Sales</span>
-          </button>
+          </button>)}
           {openSection === 'sales' && (
             <div className="ml-6 mt-2 space-y-2">
               <Link href="/sales/add" legacyBehavior>
@@ -57,16 +56,33 @@ export default function Sidebar({ data }) {
               <Link href="/sales" legacyBehavior>
                 <a className="block hover:bg-gray-700 p-2 rounded">All Sales</a>
               </Link>
-              {/* <Link href="/sales/view" legacyBehavior>
-                <a className="block hover:bg-gray-700 p-2 rounded">View Sales Details</a>
-              </Link> */}
             </div>
           )}
         </div>
         <div>
-
           {data && data.category === 'Admin' && (
               <button
+                onClick={() => toggleSection('services')}
+                className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded w-full text-left"
+              >
+                <FaUser />
+                <span>Services</span>
+              </button>
+            )}
+            {openSection === 'services' && (
+              <div className="ml-6 mt-2 space-y-2">
+                <Link href="/services/add" legacyBehavior>
+                  <a className="block hover:bg-gray-700 p-2 rounded">Add Service</a>
+                </Link>
+                <Link href="/services" legacyBehavior>
+                  <a className="block hover:bg-gray-700 p-2 rounded">All Services</a>
+                </Link>
+              </div>
+            )}
+        </div>
+        <div>
+          {data && data.category === 'Admin' && (
+            <button
               onClick={() => toggleSection('users')}
               className="flex items-center space-x-2 hover:bg-gray-700 p-2 rounded w-full text-left"
             >
@@ -74,7 +90,6 @@ export default function Sidebar({ data }) {
               <span>Users</span>
             </button>
           )}
-
           {openSection === 'users' && (
             <div className="ml-6 mt-2 space-y-2">
               <Link href="/users/add" legacyBehavior>

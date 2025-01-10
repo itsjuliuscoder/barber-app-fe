@@ -90,93 +90,96 @@ export default function AddSales() {
   }
 
 return (
-    <div className="flex flex-col h-screen">
-        <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" } />
-        <ToastContainer />
-        <div className="flex flex-1">
-        <Sidebar data={userData} />
-            <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
-                <div className="bg-gray-100 p-6 shadow-md rounded-lg h-full">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-semibold">Add New Sales</h2>
-                    </div>
-                    <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
-                        {payments.map((payment, index) => (
-                            <div key={index} className="col-span-2 grid grid-cols-3 gap-4 mb-4">
-                            <div className="col-span-1">
-                                <label className="block text-sm font-medium text-gray-700">Customer Name</label>
-                                <input
-                                type="text"
-                                name="customerName"
-                                value={payment.customerName}
-                                onChange={(e) => handlePaymentChange(index, e)}
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                required
-                                />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="block text-sm font-medium text-gray-700">Amount</label>
-                                <input
-                                type="number"
-                                name="amount"
-                                value={payment.amount}
-                                onChange={(e) => handlePaymentChange(index, e)}
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                required
-                                />
-                            </div>
-                            <div className="col-span-1">
-                                <label className="block text-sm font-medium text-gray-700">Service</label>
-                                <select
-                                name="service"
-                                value={payment.service}
-                                onChange={(e) => handlePaymentChange(index, e)}
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                required
-                                >
-                                <option value="">Select Service</option>
-                                <option value="Haircut">Haircut</option>
-                                <option value="Shave">Shave</option>
-                                <option value="Coloring">Coloring</option>
-                                <option value="Styling">Styling</option>
-                                {/* Add more services as needed */}
-                                </select>
-                            </div>
-                            <div className="col-span-3 flex justify-end">
-                                {payments.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => handleRemovePayment(index)}
-                                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none"
-                                >
-                                    Remove
-                                </button>
-                                )}
-                            </div>
-                            </div>
-                        ))}
-                        <div className="col-span-2 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={handleAddPayment}
-                                className="bg-white border border-blue-500 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-100 focus:outline-none flex items-center"
-                            >
-                            Add Payment <FaPlus className="ml-2" />
-                            </button>
-                        </div>
-                        <div className="col-span-2 flex justify-end mt-4">
-                            <button
-                            type="submit"
-                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
-                            >
-                            <span>Add New User</span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+  <div className="flex flex-col h-screen">
+    <Navbar data={userData && userData.fullName ? (userData.fullName) : "John Doe" } />
+    <ToastContainer />
+    <div className="flex flex-1">
+    <Sidebar data={userData} />
+      <div className="flex-1 p-6 font-[family-name:var(--font-geist-poppins)] text-black">
+        <div className="bg-gray-100 p-6 shadow-md rounded-lg h-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">Add New Sales</h2>
+          </div>
+          <form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
+            <div className="col-span-2 grid grid-cols-3 gap-4 mb-4">
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                <input
+                type="text"
+                name="customerName"
+                value={payments[0].customerName}
+                onChange={(e) => handlePaymentChange(0, e)}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                required
+                />
+              </div>
             </div>
+            {payments.map((payment, index) => (
+              <div key={index} className="col-span-2 grid grid-cols-3 gap-4 mb-4">
+                <div className="col-span-1">
+                  <label className="block text-sm font-medium text-gray-700">Service</label>
+                  <select
+                  name="service"
+                  value={payment.service}
+                  onChange={(e) => handlePaymentChange(index, e)}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  required
+                  >
+                  <option value="">Select Service</option>
+                  <option value="Haircut">Haircut</option>
+                  <option value="Shave">Shave</option>
+                  <option value="Coloring">Coloring</option>
+                  <option value="Styling">Styling</option>
+                  {/* Add more services as needed */}
+                  </select>
+                </div>
+                
+                <div className="col-span-1">
+                  <label className="block text-sm font-medium text-gray-700">Amount</label>
+                  <input
+                  type="number"
+                  name="amount"
+                  value={payment.amount}
+                  onChange={(e) => handlePaymentChange(index, e)}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  required
+                  />
+                </div>
+              <div className="col-span-3 flex justify-end">
+                {payments.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemovePayment(index)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none"
+                >
+                  Remove
+                </button>
+                )}
+              </div>
+              </div>
+            ))}
+            <div className="col-span-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleAddPayment}
+                className="bg-white border border-blue-500 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-100 focus:outline-none flex items-center"
+              >
+              Add Payment <FaPlus className="ml-2" />
+              </button>
+            </div>
+            <div className="col-span-2 flex justify-end mt-4">
+              <button
+              type="submit"
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
+              >
+              <span>Submit </span> {loading && <FaSpinner className="animate-spin inline ml-2" />}
+              </button>
+            </div>
+          </form>
         </div>
-        <Footer />
+      </div>
     </div>
+    <Footer />
+  </div>
 );
 }
