@@ -5,17 +5,22 @@ import Sidebar from '../../../components/Shared/Sidebar';
 import Footer from '../../../components/Shared/Footer';
 import { FaPlus, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
-import { addSales } from '@/services/api'; // Assuming you have an API function to add sales
+import { addSales, getAllServices, getAllUsers } from '@/services/api'; // Assuming you have an API function to add sales
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function AddSales() {
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [payments, setPayments] = useState([{ customerName: '', amount: '', service: '' }]);
+  const [customerName, setCustomerName] = useState({customerName: ''});
+  const [payments, setPayments] = useState([{ customerName: '', amount: '', service: '', discount: '', staff: '', commission: '' }]);
   const [userData, setUserData] = useState(null);
   const [pageLoader, setPageLoader] = useState(true);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [discountEnabled, setDiscountEnabled] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [servicesData, setServicesData] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
     const user = localStorage.getItem('userDetails');
@@ -30,6 +35,30 @@ export default function AddSales() {
         setPageLoader(false);
     }, 2000);
 
+    const fetchServices = async () => {
+
+      try {
+        const response = await getAllServices();
+        console.log("Services data ---> ", response);
+        setServicesData(response);
+      } catch (error) {
+        console.log("Error fetching services data:", error);
+      }
+
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await getAllUsers();
+        setAllUsers(response.users);
+        console.log("Users data ---> ", response);
+      } catch (error) {
+        console.log("Error fetching users data:", error);
+      }
+    };
+
+    fetchUsers();
+    fetchServices();
     // Cleanup the timer
     return () => clearTimeout(timer);
   }, [router]);
@@ -42,11 +71,19 @@ export default function AddSales() {
     const { name, value } = event.target;
     const newPayments = [...payments];
     newPayments[index][name] = value;
+
+    if (name === 'service') {
+      const selectedService = servicesData.find(service => service.title === value);
+      if (selectedService) {
+        newPayments[index].amount = selectedService.price;
+      }
+    }
+
     setPayments(newPayments);
   };
 
   const handleAddPayment = () => {
-    setPayments([...payments, { customerName: '', amount: '', service: '' }]);
+    setPayments([...payments, { amount: '', service: '', staff: '', commission:'', discount: '' }]);
   };
 
   const handleRemovePayment = (index) => {
@@ -58,22 +95,25 @@ export default function AddSales() {
     setLoading(true);
     event.preventDefault();
     const payload = {
+      customerName: customerName.customerName,
       payments,
-      user: userData._id,
-      commission: userData.commission, // Assuming a fixed commission for simplicity
+      // user: userData._id,
+      // commission: userData.commission, // Assuming a fixed commission for simplicity
     };
 
     console.log('Form Data:', payload);
 
     try {
-        await addSales(payload);
+        // await addSales(payload);
         toast.success('Sales added successfully');
-        setTimeout(() => {
-            router.push('/dashboard');
-        }, 2000);
+        // setTimeout(() => {
+        //     router.push('/dashboard');
+        // }, 2000);
     } catch (error) {
       console.log('Error adding sales:', error);
       toast.error('Failed to add sales');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,8 +147,8 @@ return (
                 <input
                 type="text"
                 name="customerName"
-                value={payments[0].customerName}
-                onChange={(e) => handlePaymentChange(0, e)}
+                value={customerName.customerName}
+                onChange={(e) => setCustomerName({ customerName: e.target.value })}
                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 required
                 />
@@ -119,31 +159,59 @@ return (
                 <div className="col-span-1">
                   <label className="block text-sm font-medium text-gray-700">Service</label>
                   <select
-                  name="service"
-                  value={payment.service}
-                  onChange={(e) => handlePaymentChange(index, e)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  required
+                    name="service"
+                    value={payment.service}
+                    onChange={(e) => handlePaymentChange(index, e)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    required
                   >
-                  <option value="">Select Service</option>
-                  <option value="Haircut">Haircut</option>
-                  <option value="Shave">Shave</option>
-                  <option value="Coloring">Coloring</option>
-                  <option value="Styling">Styling</option>
-                  {/* Add more services as needed */}
+                    <option value="">Select Service</option>
+                    {servicesData.map((service) => (
+                      <option key={service._id} value={service.title}>{service.title}</option>
+                    ))}
                   </select>
                 </div>
-                
                 <div className="col-span-1">
                   <label className="block text-sm font-medium text-gray-700">Amount</label>
                   <input
-                  type="number"
-                  name="amount"
-                  value={payment.amount}
-                  onChange={(e) => handlePaymentChange(index, e)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  required
+                    type="number"
+                    name="amount"
+                    value={payment.amount}
+                    onChange={(e) => handlePaymentChange(index, e)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    required
+                    disabled={true}
                   />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-sm font-medium text-gray-700">Service Rendered By</label>
+                  <select
+                    name="staff"
+                    value={payment.staff}
+                    onChange={(e) => handlePaymentChange(index, e)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="">Select Staff</option>
+                    {allUsers.map((user) => (
+                        <option key={user._id} value={user.commission}>{user.fullName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-span-1">
+                    {discountEnabled && (
+                      <div className="col-span-1 mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Discount Amount</label>
+                        <input
+                          type="number"
+                          name="discount"
+                          value={payment.discount}
+                          onChange={(e) => handlePaymentChange(index, e)}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
+                    )}
                 </div>
               <div className="col-span-3 flex justify-end">
                 {payments.length > 1 && (
@@ -158,6 +226,15 @@ return (
               </div>
               </div>
             ))}
+            <div className="col-span-2 flex items-center mt-4">
+              <label className="block text-sm font-medium text-gray-700 mr-2">Enable Discount</label>
+              <input
+                type="checkbox"
+                checked={discountEnabled}
+                onChange={() => setDiscountEnabled(!discountEnabled)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+            </div>
             <div className="col-span-2 flex justify-end">
               <button
                 type="button"
@@ -176,6 +253,7 @@ return (
               </button>
             </div>
           </form>
+          
         </div>
       </div>
     </div>

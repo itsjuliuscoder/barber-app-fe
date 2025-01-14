@@ -7,6 +7,13 @@ import { FaUserTie, FaDollarSign, FaBox } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { getAllSales, getAllInventories, getAllUsers } from '@/services/api';
 import { accounting } from 'accounting';
+import { Bar, Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+import { Tab } from '@headlessui/react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format, isWithinInterval } from 'date-fns';
 
 export default function Dashboard() {
 
@@ -17,6 +24,8 @@ export default function Dashboard() {
   const [inventories, setInventories] = useState([]);
   const [totalInventory, setTotalInventory] = useState(0);
   const [pageLoader, setPageLoader] = useState(true);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
  
   const [userData, setUserData] = useState(null);
   
@@ -78,7 +87,10 @@ export default function Dashboard() {
 
   }, [router], []);
 
-  
+  const filteredSalesData = salesData.filter(sale => {
+    const saleDate = new Date(sale.dateEnrolled);
+    return isWithinInterval(saleDate, { start: startDate, end: endDate });
+  });
 
   if (pageLoader) {
     return (
@@ -91,6 +103,80 @@ export default function Dashboard() {
       </div>
     );
   }
+
+
+  const salesChartData = {
+    labels: filteredSalesData.map(sale => format(new Date(sale.dateEnrolled), 'MM/dd/yyyy')),
+    datasets: [
+      {
+        label: 'Total Amount',
+        data: filteredSalesData.map(sale => sale.payments.reduce((total, payment) => total + payment.amount, 0)),
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Commission Made',
+        data: filteredSalesData.map(sale => sale.commission),
+        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+        borderColor: 'rgba(153, 102, 255, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const salesChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Sales Statistics',
+      },
+    },
+  };
+
+  const inventoryChartData = {
+    labels: inventories.map(inventory => inventory.itemName),
+    datasets: [
+      {
+        label: 'Inventory Count',
+        data: inventories.map(inventory => inventory.count),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const inventoryChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Inventory Statistics',
+      },
+    },
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -133,30 +219,101 @@ export default function Dashboard() {
           <div className="flex gap-6 w-full">
             <div className="flex-grow bg-gray-100 p-6 shadow-md rounded-lg basis-3/5">
               {userData && userData.category === 'Admin' ? (
-                <table className="min-w-full bg-white">
-                  <thead>
-                    <tr>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Staff Details</th>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
-                      <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {salesData.map((sale, index) => (
-                      <tr key={sale._id}>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">{(sale.payments.map(payment => payment.customerName).join(', '))}</td>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.payments.reduce((total, payment) => total + payment.amount, 0))}</td>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.fullName}</td>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">₦{accounting.format(sale.commission)}</td>
-                        <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
-                      </tr>
-                    ))}                   
-                  </tbody>
-                </table>
+                  <Tab.Group>
+                  <Tab.List className="flex p-1 space-x-1 bg-blue-900/20 rounded-xl">
+                    <Tab
+                      className={({ selected }) =>
+                        `w-full py-2.5 text-sm leading-5 font-medium text-blue-700 rounded-lg ${
+                          selected ? 'bg-white shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                        }`
+                      }
+                    >
+                      Statistics
+                    </Tab>
+                    <Tab
+                      className={({ selected }) =>
+                        `w-full py-2.5 text-sm leading-5 font-medium text-blue-700 rounded-lg ${
+                          selected ? 'bg-white shadow' : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                        }`
+                      }
+                    >
+                      Sales Table
+                    </Tab>
+                  </Tab.List>
+                  <Tab.Panels className="mt-2">
+                  <Tab.Panel className="bg-gray-100 p-6 shadow-md rounded-lg">
+                  <h2 className="text-2xl font-semibold mb-4">Sales Statistics</h2>
+                  <div className="flex space-x-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                      <DatePicker
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">End Date</label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+                    <Bar data={salesChartData} options={salesChartOptions} />
+                  </Tab.Panel>
+                    <Tab.Panel className="bg-gray-100 p-6 shadow-md rounded-lg">
+                        <h2 className="text-2xl font-semibold mb-4">Sales Table</h2>
+                        <div className="flex space-x-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                            <DatePicker
+                              selected={startDate}
+                              onChange={(date) => setStartDate(date)}
+                              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">End Date</label>
+                            <DatePicker
+                              selected={endDate}
+                              onChange={(date) => setEndDate(date)}
+                              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                        </div>
+                        {filteredSalesData.length > 0 ? (
+                          <table className="min-w-full bg-white">
+                            <thead>
+                              <tr>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Sale ID</th>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Customer</th>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Total Amount</th>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Staff Details</th>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Commission Made</th>
+                                <th className="py-2 px-4 border-b border-gray-200 text-left">Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredSalesData.map((sale, index) => (
+                                <tr key={sale._id}>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">{index + 1}</td>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.customerName ? sale.customerName : sale.payments.map(payment => payment.customerName).join(', ')}</td>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.payments.reduce((total, payment) => total + payment.amount, 0)}</td>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">{sale.user.email}</td>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">₦{sale.commission}</td>
+                                  <td className="py-2 px-4 border-b border-gray-200 text-left">{new Date(sale.dateEnrolled).toLocaleDateString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p>No Sales Data for this Range Date</p>
+                        )}
+                    </Tab.Panel>
+                  </Tab.Panels>
+                </Tab.Group>
               ) : (
                 <div>
                   <h2 className="text-2xl font-semibold mb-4">Your Sales</h2>
@@ -197,16 +354,13 @@ export default function Dashboard() {
               )}
             </div>
             <div className="flex-grow-0 flex-shrink-0 basis-2/5">
-              <div className="bg-gray-100 p-6 shadow-md rounded-lg">
-                {/* Content for the second column */}
-                <h2 className="text-xl font-semibold mb-4">Sales Statistics</h2>
-                <p>This is the content for the second column, which takes up 40% of the width.</p>
-              </div>
               <div className="bg-gray-100 p-6 shadow-md rounded-lg mt-3">
                 {/* Content for the second column */}
                 <h2 className="text-xl font-semibold mb-4">Inventory Statistics</h2>
-                <p>This is the content for the second column, which takes up 40% of the width.</p>
+                {/* <p>This is the content for the second column, which takes up 30% of the width.</p> */}
+                <Doughnut data={inventoryChartData} options={inventoryChartOptions} />
               </div>
+            <div className="bg-gray-100 p-6 shadow-md rounded-lg mt-3"></div>
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import { getAllSales } from '@/services/api';
 export default function SalesList() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [refund, setRefund] = useState(null);
   const [userData, setUserData] = useState(null);
   const [salesData, setSalesData] = useState([]);
   const [pageLoader, setPageLoader] = useState(true);
@@ -75,6 +76,11 @@ export default function SalesList() {
     printWindow.document.close();
     printWindow.print();
   };
+
+  const handlePaymentRefund = (sale) => {
+    setRefund(sale);
+    console.log("Refund sale:", sale);
+  }
 
   if (pageLoader) {
     return (
@@ -155,7 +161,13 @@ export default function SalesList() {
                             >
                               Print Receipt
                             </button>
-                              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Delete</a>
+                            <button
+                              onClick={() => handlePaymentRefund(sale)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                                <a href="#" role="menuitem">Refund</a>
+                            </button>
+                             
                             </div>
                           </div>
                         )}
